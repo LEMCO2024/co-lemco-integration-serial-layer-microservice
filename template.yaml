@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  integration-layer-serial
+Globals:
+  Function:
+    Timeout: 60
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Parameters:
+  AppName:
+    Type: String
+    Default: serial
+  AppEnv:
+    Type: String
+    Default: dev
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Sub "${AppEnv}"
+      OpenApiVersion: '2.0'
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !ImportValue co-lemco-integration-layer-infra-dev-userpool-arn
+            AuthorizationScopes:
+              - 'api/serial'
+              - 'api/workorders'
+  OracleLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "oracle-db-layer-${AppEnv}" 
+      Description: Shared dependencies for oracle db access 
+      ContentUri: src/layers/oracle/
+      CompatibleRuntimes:
+        - nodejs18.x
+      LicenseInfo: 'MIT'
+      RetentionPolicy: Retain
+  SerialFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/functions/serial/
+      Role: 
+        Fn::ImportValue: !Sub 'co-lemco-integration-layer-infra-${AppEnv}-role-arn'
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref OracleLayer
+      MemorySize: 256
+      VpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub 'co-lemco-integration-layer-infra-${AppEnv}-oracle-sg'
+        SubnetIds:
+          - 'subnet-046711eb72c55a154'
+          - 'subnet-0e8b16f95f347dde5'
+      Environment:
+        Variables:
+          CORS_ORIGIN: '*'
+          DATABASE_SECRET_NAME: !Sub 'co-lemco-integration-layer-db-baan-secret-${AppEnv}'
+      Architectures:
+        - x86_64
+      Events:
+        Serial:
+          Type: Api
+          Properties:
+            Path: /v1/serial/{proxy+}
+            Method: any
+            RestApiId: !Ref ApiGatewayApi
+            #Auth:
+              #Authorizer: CognitoAuthorizer
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'

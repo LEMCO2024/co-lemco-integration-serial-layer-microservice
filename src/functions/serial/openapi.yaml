@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Serial API
+  version: 3.0.0
+  description: This API provides services to expose lists of products according to the client as well as create them. Its purpose is to facilitate easy integration of external or internal applications by consuming the created API contract.
+      Internally extracts and processes the requested information from the Challenger ERP.
+
+paths:
+
+  /product-by-serial:
+    post:
+      summary: 'Get product by serial code'
+      parameters:
+        - name: SerialCode
+          in: query
+          description: 'Serial code of the product'
+          required: true
+          schema:
+            type: string
+            maxLength: 30
+      responses:
+        '200':
+          description: 'Successful response'
+  
+  /exist-associated-product:
+    post:
+      summary: 'Check if associated product exists'
+      parameters:
+        - name: SerialCode
+          in: query
+          description: 'Serial code of the product'
+          required: true
+          schema:
+            type: string
+            maxLength: 30
+        - name: SkuCode
+          in: query
+          description: 'SKU code of the product'
+          required: true
+          schema:
+            type: string
+            maxLength: 30
+      responses:
+        '200':
+          description: 'Successful response'
+  
+  /bulk-add-many-products:
+    post:
+      summary: 'Bulk add many products'
+      requestBody:
+        description: A JSON object containing pet information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductToCreate'
+      responses:
+        '200':
+          description: 'Successful response'
+ 
+components:
+  schemas:
+    ProductToCreate:
+        type: array
+        items:
+          type: object

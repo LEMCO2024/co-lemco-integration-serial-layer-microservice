@@ -1,0 +1,11 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "co-lemco-integration-serial-layer-sam"
+resolve_s3 = true
+s3_prefix = "co-lemco-integration-serial-layer-sam"
+region = "us-east-1"
+profile = "lemcodev"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "AppName=\"lemco-integration-layer\" AppEnv=\"dev\""
+image_repositories = []
