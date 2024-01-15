@@ -4,7 +4,12 @@ info:
   version: 3.0.0
   description: This API provides services to expose lists of products according to the client as well as create them. Its purpose is to facilitate easy integration of external or internal applications by consuming the created API contract.
       Internally extracts and processes the requested information from the Challenger ERP.
-
+servers:
+  - url: https://szl7po1311.execute-api.us-east-1.amazonaws.com/dev/v1/serial
+    description: Dev server
+  - url: not available in the momement
+    description: Production server
+    
 paths:
 
   /product-by-serial:
