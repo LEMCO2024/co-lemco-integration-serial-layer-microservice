@@ -192,10 +192,10 @@ const bulkAddManyProducts = async (products) => {
           }
         : undefined,
     success:
-      successProductsCreated.length > 0
+      productsToCreate.length > 0
         ? {
             message: "successfully created products.",
-            listProductsCreated: successProductsCreated,
+            listProductsCreated: productsToCreate,
           }
         : undefined,
   };

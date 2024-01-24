@@ -68,8 +68,8 @@ Resources:
             Path: /v1/serial/{proxy+}
             Method: any
             RestApiId: !Ref ApiGatewayApi
-            #Auth:
-              #Authorizer: CognitoAuthorizer
+            Auth:
+              Authorizer: CognitoAuthorizer
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
