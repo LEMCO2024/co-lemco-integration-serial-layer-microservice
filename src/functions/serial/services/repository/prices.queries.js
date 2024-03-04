@@ -1,4 +1,4 @@
-const productsBySerial = `SELECT 
+const productsBySerial_v1 = `SELECT 
 A.LOTE SERIAL,
 A.ARTICULO,
 B.T$DSCA DESCRIPCION, 
@@ -18,8 +18,33 @@ AND A.TIPO=2
 AND C.T$STCO=D.T$BPID
 AND A.LOTE = :serialCode`;
 
-const asociatedProducts = `Select * From baan.tchapr008120
+const productsBySerial_v2 = `SELECT 
+A.LOTE SERIAL,
+A.ARTICULO,
+B.T$DSCA DESCRIPCION_PROD, 
+A.COMPRESOR SERIAL_COMPRESOR, 
+A.ORDEN,
+A.DOCUMENTO SP_SALIDA,
+(C.T$CDAT-0.209) FECHA_ENVIO,
+A.ALMACEN, 
+F.T$NAMA DISTRIBUIDOR
+FROM 
+BAAN.TCHAPR018120 A
+LEFT JOIN BAAN.TTCIBD001120 B ON LTRIM(RTRIM(A.ARTICULO))=LTRIM(RTRIM(B.T$ITEM))
+LEFT JOIN BAAN.TWHINH430120 C ON LTRIM(RTRIM(A.DOCUMENTO))=LTRIM(RTRIM(C.T$SHPM))
+LEFT JOIN BAAN.TTCCOM100120 D ON LTRIM(RTRIM(C.T$STCO))=LTRIM(RTRIM(D.T$BPID))
+LEFT JOIN BAAN.TTDSLS400120 E ON A.ORDEN=E.T$ORNO
+LEFT JOIN BAAN.TTCLOC008120 F ON E.T$OFBP = F.T$BPID
+WHERE A.TIPO=2 
+ AND A.ORIGEN=1
+ AND A.LOTE = :serialCode`;
+
+const asociatedProducts_v1 = `Select * From baan.tchapr008120
 where Lote = :serialCode
     and ARTICULO = :skuCode`
 
-module.exports = { productsBySerial, asociatedProducts }
+const asociatedProducts_v2 = `Select * From BAAN.TCHAPR018120
+where Lote = :serialCode
+    and ARTICULO = :skuCode`
+
+module.exports = { productsBySerial: productsBySerial_v2, asociatedProducts: asociatedProducts_v2 }
