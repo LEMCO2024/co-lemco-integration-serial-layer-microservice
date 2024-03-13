@@ -2,9 +2,11 @@ const repository = require("../../utils/db_manager");
 const pricesMapper = require("./prices.mapper");
 const { productsBySerial, asociatedProducts } = require("./prices.queries");
 
-const findProductBySerial = async (serialCode) => {
+const findProductBySerial = async (serialCode, pageNumber, pageSize) => {
   const pricesResponseOutput = await repository.execute(productsBySerial, [
     serialCode,
+    pageNumber,
+    pageSize
   ]);
   return pricesResponseOutput;
 };

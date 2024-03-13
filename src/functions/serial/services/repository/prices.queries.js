@@ -39,6 +39,32 @@ WHERE A.TIPO=2
  AND A.ORIGEN=1
  AND A.LOTE = :serialCode`;
 
+ const productsBySerial_v3 = `SELECT *
+ FROM (
+     SELECT
+         A.LOTE SERIAL,
+         A.ARTICULO,
+         B.T$DSCA DESCRIPCION_PROD,
+         A.COMPRESOR SERIAL_COMPRESOR,
+         A.ORDEN,
+         A.DOCUMENTO SP_SALIDA,
+         (C.T$CDAT-0.209) FECHA_ENVIO,
+         A.ALMACEN,
+         F.T$NAMA DISTRIBUIDOR,
+         ROW_NUMBER() OVER (ORDER BY A.LOTE ASC) AS RowNum
+     FROM BAAN.TCHAPR018120 A
+     LEFT JOIN BAAN.TTCIBD001120 B ON LTRIM(RTRIM(A.ARTICULO)) = LTRIM(RTRIM(B.T$ITEM))
+     LEFT JOIN BAAN.TWHINH430120 C ON LTRIM(RTRIM(A.DOCUMENTO)) = LTRIM(RTRIM(C.T$SHPM))
+     LEFT JOIN BAAN.TTCCOM100120 D ON LTRIM(RTRIM(C.T$STCO)) = LTRIM(RTRIM(D.T$BPID))
+     LEFT JOIN BAAN.TTDSLS400120 E ON A.ORDEN = E.T$ORNO
+     LEFT JOIN BAAN.TTCLOC008120 F ON E.T$OFBP = F.T$BPID
+     WHERE A.TIPO = 2
+     AND A.ORIGEN = 1
+     AND A.LOTE = :serialCode
+ ) AS PagedData
+ WHERE RowNum BETWEEN :pageNumber * :pageSize - (:pageSize - 1) AND :pageNumber * :pageSize;
+ `;
+
 const asociatedProducts_v1 = `Select * From baan.tchapr008120
 where Lote = :serialCode
     and ARTICULO = :skuCode`
@@ -47,4 +73,4 @@ const asociatedProducts_v2 = `Select * From BAAN.TCHAPR018120
 where Lote = :serialCode
     and ARTICULO = :skuCode`
 
-module.exports = { productsBySerial: productsBySerial_v2, asociatedProducts: asociatedProducts_v2 }
+module.exports = { productsBySerial: productsBySerial_v3, asociatedProducts: asociatedProducts_v2 }
